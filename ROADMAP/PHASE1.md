@@ -260,6 +260,344 @@ Useful documentation:
 
 ---
 
+
+## 7. – Pre-Installation Checklist
+### Preparing the Old Computer for Ubuntu Server
+
+### 1. Objective
+
+Before replacing Windows 10 with Ubuntu Server, perform a few additional checks.
+
+These checks help prevent:
+
+- Accidental data loss.
+- Hardware compatibility issues.
+- Network connectivity problems.
+- BIOS/UEFI configuration problems.
+- Loss of software licenses or credentials.
+
+Computer specifications:
+
+| Component | Specification |
+|---|---|
+| Processor | Intel Core i7-8700 |
+| RAM | 16 GB |
+| GPU | NVIDIA GeForce GTX 1070 |
+| GPU VRAM | 8 GB |
+| Storage 1 | Kingston 240 GB SSD |
+| Storage 2 | Western Digital 1 TB SSD |
+| Storage 3 | Seagate 1 TB HDD |
+
+Target operating system: Ubuntu Server 26.04.1 LTS.
+
+---
+
+### 2. Record the Windows Configuration
+
+Even if Windows will be removed, collect some information before installation.
+
+Open PowerShell as Administrator.
+
+#### A. Check Windows Activation
+
+Execute:
+
+```powershell
+slmgr /xpr
+```
+
+This tells you whether Windows is permanently activated.
+
+Why?
+
+If you ever want to reinstall Windows, you will know whether you have a digital license.
+
+Results : Windows(R), Core edition: The Machine is permanently activated.
+
+#### B. Check BIOS/UEFI Configuration
+
+Execute:
+
+```powershell
+msinfo32
+```
+
+Look for:
+
+- BIOS Mode: UEFI or Legacy.
+- BIOS Version/Date.
+- Secure Boot State.
+
+Take a screenshot.
+
+This information will help configure the Ubuntu installation USB correctly.
+
+Results : Screenshot taken
+
+#### C. Record Network Configuration
+
+Execute:
+
+```powershell
+ipconfig /all
+```
+
+Record:
+
+- Ethernet adapter model.
+- Wi-Fi adapter model.
+- MAC address.
+- Current IP configuration.
+
+This information is useful if network driver issues occur with Ubuntu.
+
+Results : Screenshot taken
+
+---
+
+### 3. Check Disk Configuration
+
+This is particularly important because the computer has three physical drives.
+
+Open PowerShell:
+
+```powershell
+Get-Disk |
+    Format-Table Number, FriendlyName, PartitionStyle, OperationalStatus, Size
+```
+
+Then:
+
+```powershell
+Get-Partition |
+    Format-Table DiskNumber, PartitionNumber, DriveLetter, Type, Size
+```
+
+Identify:
+
+- Which physical disk contains Windows.
+- Which disks contain personal data.
+- Whether any disks use BitLocker.
+- Whether disks use GPT or MBR partitioning.
+
+Results : Screenshot taken
+
+#### Check BitLocker
+
+Execute:
+
+```powershell
+manage-bde -status
+```
+
+If any drive is encrypted, make sure you have its recovery key before changing the system.
+
+Results : Screenshot taken
+
+---
+
+### 4. Check BIOS Settings
+
+The Intel i7-8700 and GTX 1070 should work well with Ubuntu.
+
+Restart the computer and enter BIOS/UEFI (usually by pressing DEL or F2 during startup).
+
+Look for the following settings:
+
+| Setting | Recommendation |
+|---|---|
+| Boot mode | UEFI |
+| SATA mode | AHCI, if already configured that way |
+| Secure Boot | Keep enabled initially if supported |
+| Intel Virtualization Technology (VT-x) | Enabled |
+| Intel VT-d | Enabled if available |
+| Primary graphics | PCIe / PEG |
+| Wake on LAN | Optional |
+
+**Important:** Do not change SATA mode blindly.
+
+Switching between RAID/RST and AHCI can cause Windows boot problems. Evaluate the existing configuration first.
+
+Also, do not update the BIOS just for the sake of updating it. A BIOS update has some risk and is not necessary if the machine is working correctly.
+
+Results : Screenshot taken
+
+---
+
+### 5. Check Software Licenses and Credentials
+
+Before removing Windows, check whether you have:
+
+- Paid software requiring license deactivation.
+- Password managers or browser profiles.
+- SSH keys.
+- Git credentials.
+- VPN configurations.
+- Important certificates.
+- Wi-Fi passwords.
+
+For the future AI project, particularly preserve SSH keys and Git configuration if already available.
+
+---
+
+### 6. Prepare the Physical Computer
+
+A little maintenance is worthwhile before turning the computer into a server.
+
+Recommended actions:
+
+- Remove accumulated dust from the case.
+- Check that CPU and GPU fans rotate freely.
+- Check that the three storage drives are securely connected.
+- Verify that the Ethernet port works.
+- Check that the computer has adequate ventilation.
+
+The GTX 1070 is an older graphics card, so checking its cooling system is worthwhile.
+
+Do not disassemble the GPU unless you are comfortable doing so.
+
+---
+
+### 7. Prepare the Network
+
+Since this computer will become a server, Ethernet is recommended instead of Wi-Fi.
+
+Before installation:
+
+- Make sure you have an Ethernet cable.
+- Identify an available router port.
+- Check that you can access your router administration interface.
+- Know how to configure DHCP reservations.
+
+Later, configure a stable local IP address for the server.
+
+Example:
+
+```text
+Server hostname: ai-server
+Server IP:       192.168.1.120
+```
+
+This will make remote access much easier.
+
+---
+
+### 8. Prepare the Installation Environment
+
+One important recommendation:
+
+**Disconnect the two 1 TB drives physically during the Ubuntu installation, if practical.**
+
+Leave only the 240 GB Kingston SSD connected.
+
+This prevents accidentally selecting or formatting the wrong disk.
+
+Also:
+
+- Have a keyboard and monitor connected.
+- Keep the computer connected to Ethernet.
+- Have your Ubuntu USB ready.
+- Keep access to another computer in case troubleshooting is necessary.
+
+---
+
+### 9. Pre-Installation Checklist
+
+#### Windows preparation
+
+- [x] Check Windows activation.
+- [x] Record BIOS mode and Secure Boot status.
+- [x] Record BIOS version.
+- [x] Record Ethernet and Wi-Fi adapters.
+- [x] Check disk partition layout.
+- [x] Check BitLocker status.
+- [x] Save SSH keys, credentials and software licenses.
+
+#### Hardware preparation
+
+- [skipped] Clean the computer and check fans.
+- [skipped] Check SSD and HDD connections.
+- [x] Verify Ethernet connectivity.
+- [x] Check BIOS virtualization settings.
+
+#### Installation preparation
+
+- [ ] Download Ubuntu Server ISO.
+- [ ] Download Rufus.
+- [ ] Prepare an 8 GB or larger USB drive.
+- [ ] Identify the Kingston 240 GB SSD.
+- [ ] Prepare to disconnect the two 1 TB drives.
+- [ ] Connect monitor, keyboard and Ethernet.
+
+---
+
+### 10. Final Compatibility Checks
+
+Before installing Linux, retrieve the following information using PowerShell:
+
+```powershell
+# 1. BIOS and Secure Boot
+Get-ComputerInfo |
+    Select-Object BiosFirmwareType, BiosVersion
+
+# 2. Secure Boot status
+Confirm-SecureBootUEFI
+
+# 3. Disk layout
+Get-Disk |
+    Format-Table Number, FriendlyName, PartitionStyle, Size
+
+# 4. BitLocker
+manage-bde -status
+```
+
+Send these results for review before proceeding.
+
+The objective is to determine the safest installation configuration, particularly regarding:
+
+- UEFI.
+- Secure Boot.
+- Disk partitioning.
+- BitLocker.
+- Storage drive selection.
+
+---
+
+### 11. Important Final Precaution
+
+Do not erase Windows until you have successfully booted the Ubuntu USB and confirmed that the installer detects:
+
+- Your network adapter.
+- Your Kingston SSD.
+- Your graphics card.
+
+This is a useful final compatibility check before committing to the migration.
+
+---
+
+### 12. Next Steps – Ubuntu Installation
+
+Once all checks are completed:
+
+1. Create the bootable Ubuntu USB.
+2. Disconnect the two 1 TB drives if practical.
+3. Boot the computer from the USB.
+4. Verify hardware detection.
+5. Install Ubuntu Server on the Kingston 240 GB SSD.
+6. Configure the hostname and user account.
+7. Configure networking and SSH.
+8. Update Ubuntu.
+9. Configure the two additional storage drives.
+10. Install and verify the NVIDIA driver.
+
+**Project:** Home AI Infrastructure
+
+**Current phase:** Phase 1 – Prepare the Old Computer
+
+**Next objective:** Complete pre-installation checks and install Ubuntu Server safely.
+
+---
+
 ## 7. Installation Preparation
 
 ### Step 1 – Download Ubuntu Server
@@ -413,3 +751,5 @@ Once the Linux server is operational, proceed to the next phase:
 **Hardware:** Intel i7-8700 / 16 GB RAM / NVIDIA GTX 1070 / 2.24 TB storage
 
 **Next objective:** Prepare the bootable USB and install Ubuntu Server safely.
+
+
