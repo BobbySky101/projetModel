@@ -1,40 +1,83 @@
 
-# Home AI Infrastructure – Personal Project Plan
+# Home AI Infrastructure – Project Overview
 
-## 1. Project Overview
+## 1. Project Objective
 
-### Objective
+Build a secure, modular and expandable home AI infrastructure by reusing an existing computer as a dedicated local AI server.
 
-Reuse an old computer by installing Linux and turning it into a dedicated local AI server.
+The objective is to create a distributed AI environment where multiple computers and AI models collaborate through a Python application.
 
-The objective is to build a distributed AI environment where:
+The infrastructure will eventually support:
 
-- The old computer hosts a lightweight local language model.
-- The current computer acts as the primary development workstation.
-- A more powerful AI model runs on the current computer or through an external API.
-- A Python application coordinates the different models.
-- AI agents help with application development, web scraping, data processing and analysis.
+- Local AI inference using lightweight language models.
+- Advanced AI reasoning using more powerful models.
+- Coordination of multiple AI agents.
+- Automated web scraping and information collection.
+- Data processing, classification and analysis.
+- Knowledge management and semantic search.
+- Automated research and report generation.
 
-### Architecture
+The project will be developed incrementally, validating each component before introducing additional complexity.
+
+## 2. Overall Architecture
+
+The infrastructure will consist of two primary computers.
+
+### 2.1 Development Workstation
+
+The current computer will act as the main development and orchestration environment.
+
+Responsibilities:
+
+- Host the main Python application.
+- Coordinate AI agents and workflows.
+- Run more powerful local AI models or connect to external AI APIs.
+- Perform complex reasoning and data analysis.
+- Manage web scraping and data processing.
+- Generate analytical reports.
+
+### 2.2 Local AI Server
+
+The old computer, now running Ubuntu Server, will act as a dedicated AI server.
+
+Responsibilities:
+
+- Host lightweight language models using Ollama.
+- Provide a local inference API.
+- Perform basic AI processing.
+- Handle text classification and information extraction.
+- Generate initial summaries and metadata.
+- Provide local AI services to the development workstation.
+
+### 2.3 Distributed Architecture
 
 ```text
-CURRENT COMPUTER
+DEVELOPMENT WORKSTATION
 - Python application
 - Agent orchestration
-- Advanced AI model
-- Development environment
+- Advanced AI models
 - Data analysis
+- Development environment
         |
-        | Local Network (SSH / HTTP)
+        | Controlled Local Network Communication
+        | SSH / HTTP
         |
-OLD COMPUTER (AI SERVER)
+        v
+LOCAL AI SERVER
 - Ubuntu Server
 - Ollama
-- Lightweight AI model
+- Lightweight AI models
 - Local inference API
         |
-        | Internet
         |
+        v
+LOCAL DATA STORAGE
+- AI models
+- Application data
+- Databases
+- Processed datasets
+- Backups
+
 EXTERNAL DATA SOURCES
 - Websites
 - Public APIs
@@ -42,270 +85,102 @@ EXTERNAL DATA SOURCES
 - Datasets
 ```
 
-## 2. Recommended Technology Stack
+The development workstation will manage the overall intelligence and orchestration, while the local server will provide additional computing and inference capabilities.
+
+## 3. Technology Stack
 
 | Component | Technology | Purpose |
 |---|---|---|
-| OS | Ubuntu Server 24.04 LTS | Linux server |
-| AI inference | Ollama | Run local models |
-| Lightweight model | Llama 3.2 1B | Basic AI tasks |
-| Programming | Python | Application development |
-| Agent framework | LangGraph | Agent orchestration |
-| IDE | Visual Studio Code | Development |
-| Remote access | SSH | Remote administration |
-| Web scraping | BeautifulSoup / Scrapy | Collect information |
+| Server operating system | Ubuntu Server | Dedicated AI server |
+| AI inference | Ollama | Local model execution |
+| Local AI models | Llama / Gemma | Lightweight AI processing |
+| Programming | Python | Main application development |
+| Agent orchestration | LangGraph | Coordinate AI agents |
+| Development environment | Visual Studio Code | Application development |
+| Remote administration | SSH | Secure server access |
+| Web scraping | Requests / BeautifulSoup / Scrapy | Information collection |
 | Data processing | Pandas | Data manipulation |
-| Database | SQLite | Store information |
+| Database | SQLite | Structured data storage |
+| Containerization | Docker | Future application isolation |
+| Firewall | nftables | Network access control |
+| Knowledge base | ChromaDB / FAISS | Future semantic search |
 
-Documentation:
+Technology choices may evolve as the project develops.
 
-- Ubuntu: https://ubuntu.com/download/server
-- Ollama: https://ollama.com/
-- Ollama docs: https://docs.ollama.com/
-- Python: https://docs.python.org/3/
-- LangGraph: https://docs.langchain.com/oss/python/langgraph/overview
-- VS Code Remote SSH: https://code.visualstudio.com/docs/remote/ssh
+## 4. AI Model Strategy
 
-## 3. AI Models
+The project will use different models according to task complexity.
 
-The old computer has 8 GB RAM. Initially, assume CPU-only inference.
+### 4.1 Lightweight Local Model
 
-### Llama 3.2 1B
+Runs on the Ubuntu AI server through Ollama.
 
-Lightweight model for basic classification, extraction and text processing.
+Primary responsibilities:
 
-```bash
-ollama pull llama3.2:1b
-```
+- Text classification.
+- Entity extraction.
+- Metadata generation.
+- Initial summarization.
+- Simple information extraction.
+- Basic text processing.
 
-### Gemma 2 2B
+Initial model candidates:
 
-Useful for text processing and experimentation.
+- Llama 3.2 3B.
+- Llama 3.2 1B.
+- Gemma 2 2B.
 
-```bash
-ollama pull gemma2:2b
-```
+The initial model will be selected based on performance, memory consumption and hardware compatibility.
 
-### Llama 3.2 3B
+### 4.2 Advanced AI Model
 
-A more capable alternative, worth testing if sufficient memory is available.
+Runs on the development workstation or through an external AI API.
 
-```bash
-ollama pull llama3.2
-```
+Primary responsibilities:
 
-Model sizes are approximate download sizes. Runtime memory requirements are higher.
+- Complex reasoning.
+- Comparing information across multiple sources.
+- Identifying patterns and trends.
+- Generating and reviewing code.
+- Advanced data analysis.
+- Producing analytical reports.
+- Coordinating complex workflows.
 
-**Recommendation:** Start with Llama 3.2 1B.
+### 4.3 Model Routing
 
-## 4. Implementation Roadmap
+The Python application will determine which model should handle each task.
 
-### Phase 1 – Prepare the Old Computer
+Initial routing will use predefined task categories.
 
-Retrieve hardware information using Windows PowerShell:
+For example:
 
-```powershell
-Get-CimInstance Win32_Processor |
-  Select-Object Name
-
-Get-CimInstance Win32_ComputerSystem |
-  Select-Object TotalPhysicalMemory
-
-Get-CimInstance Win32_DiskDrive |
-  Select-Object Model, MediaType, Size
-
-Get-CimInstance Win32_VideoController |
-  Select-Object Name
-```
-
-Record:
-
-- Processor model and generation.
-- RAM.
-- Disk capacity and type (SSD/HDD).
-- Graphics card.
-- 64-bit compatibility.
-
-Download Ubuntu Server:
-
-https://ubuntu.com/download/server
-
-Create a bootable USB using Rufus:
-
-https://rufus.ie/
-
-Recommended installation settings:
-
-| Setting | Value |
+| Task | Assigned model |
 |---|---|
-| Operating system | Ubuntu Server 24.04 LTS |
-| Operating system (better) | Ubuntu Server 26.04 LTS |
-| Hostname | ai-server |
-| Network | Ethernet preferred |
-| Installation | Clean installation |
-| SSH server | Enabled |
-| Additional packages | None initially |
+| Text classification | Local model |
+| Entity extraction | Local model |
+| Basic summarization | Local model |
+| Complex reasoning | Advanced model |
+| Code generation | Advanced model |
+| Cross-source analysis | Advanced model |
+| Analytical reporting | Advanced model |
 
-Back up important data before installing Linux.
+Intelligent task routing may be introduced later.
 
-### Phase 2 – Configure Ubuntu Server
+## 5. Python Application Architecture
 
-Update the system:
+The main Python application will coordinate the different components of the infrastructure.
 
-```bash
-sudo apt update
-sudo apt upgrade -y
-sudo reboot
-```
+Its responsibilities will include:
 
-Install useful utilities:
+- Communicating with local and advanced AI models.
+- Routing tasks to appropriate models.
+- Managing AI agents.
+- Collecting and processing information.
+- Managing application data.
+- Coordinating automated workflows.
+- Producing analytical outputs.
 
-```bash
-sudo apt install -y \
-  curl \
-  git \
-  htop \
-  build-essential \
-  python3 \
-  python3-pip \
-  python3-venv \
-  ufw
-```
-
-Retrieve the IP address:
-
-```bash
-hostname -I
-```
-
-Example:
-
-```text
-192.168.1.120
-```
-
-Configure a DHCP reservation on the router.
-
-#### Configure the firewall
-
-```bash
-sudo ufw default deny incoming
-sudo ufw default allow outgoing
-sudo ufw allow OpenSSH
-sudo ufw enable
-sudo ufw status
-```
-
-Only SSH should be accessible initially.
-
-### Phase 3 – Configure Remote Access
-
-From Windows PowerShell:
-
-```powershell
-ssh your_username@192.168.1.120
-```
-
-Replace the username and IP address with your actual values.
-
-Install Visual Studio Code and its Remote SSH extension:
-
-https://code.visualstudio.com/docs/remote/ssh
-
-Configure SSH key authentication.
-
-Documentation:
-
-https://ubuntu.com/server/docs/how-to/security/openssh-server/
-
-### Phase 4 – Install Ollama
-
-Install Ollama on Ubuntu:
-
-```bash
-curl -fsSL https://ollama.com/install.sh | sh
-```
-
-Check installation:
-
-```bash
-ollama --version
-```
-
-Download the model:
-
-```bash
-ollama pull llama3.2:1b
-```
-
-Run it:
-
-```bash
-ollama run llama3.2:1b
-```
-
-Test with:
-
-```text
-You are a data analyst.
-Explain the difference between structured
-and unstructured data.
-```
-
-#### Test the local API
-
-Ollama exposes an API on:
-
-```text
-http://localhost:11434
-```
-
-Test:
-
-```bash
-curl http://localhost:11434/api/generate \
-  -d '{
-    "model": "llama3.2:1b",
-    "prompt": "Explain what a Python function is.",
-    "stream": false
-  }'
-```
-
-#### Configure secure remote access
-
-Keep Ollama bound to localhost.
-
-On Windows PowerShell:
-
-```powershell
-ssh -L 11434:127.0.0.1:11434 your_username@192.168.1.120
-```
-
-Keep the SSH session open.
-
-In another PowerShell window:
-
-```powershell
-curl.exe http://localhost:11434/api/tags
-```
-
-The SSH tunnel forwards requests securely to Ollama.
-
-### Phase 5 – Build the Python Application
-
-On the current computer:
-
-```powershell
-mkdir home-ai-project
-cd home-ai-project
-
-python -m venv .venv
-.venv\Scripts\activate
-
-pip install requests python-dotenv
-```
-
-Recommended structure:
+### 5.1 Initial Project Structure
 
 ```text
 home-ai-project/
@@ -316,273 +191,174 @@ home-ai-project/
 ├── agents/
 │   ├── __init__.py
 │   ├── local_agent.py
-│   └── advanced_agent.py
+│   ├── advanced_agent.py
+│   └── router.py
 │
 ├── scrapers/
 │   ├── __init__.py
 │   └── web_scraper.py
 │
-└── data/
-    ├── raw/
-    └── processed/
+├── processors/
+│   ├── __init__.py
+│   └── data_processor.py
+│
+├── database/
+│   ├── __init__.py
+│   └── storage.py
+│
+├── data/
+│   ├── raw/
+│   └── processed/
+│
+└── reports/
 ```
 
-#### Configure environment variables
+The structure will evolve as new responsibilities are introduced.
 
-Create `.env`:
+## 6. Main Application Workflows
 
-```env
-LOCAL_AI_URL=http://localhost:11434
-LOCAL_AI_MODEL=llama3.2:1b
-```
+The infrastructure should eventually support several types of workflows.
 
-The localhost address works through the SSH tunnel.
+### 6.1 Information Collection and Analysis
 
-#### Implement the local AI agent
+Example workflow:
 
-Create `agents/local_agent.py`:
+1. Collect information from websites and public APIs.
+2. Extract relevant information.
+3. Clean and normalize the collected data.
+4. Send information to the local AI model for initial classification.
+5. Store structured information in a database.
+6. Send relevant datasets to the advanced AI model.
+7. Identify patterns, relationships and trends.
+8. Generate analytical reports.
 
-```python
-import requests
-import os
+### 6.2 Multi-Agent Processing
 
-from dotenv import load_dotenv
+Specialized agents will eventually handle different responsibilities.
 
-load_dotenv()
+Potential agents:
 
-OLLAMA_URL = os.getenv("LOCAL_AI_URL")
-MODEL = os.getenv("LOCAL_AI_MODEL")
+- Research agent.
+- Web scraping agent.
+- Data processing agent.
+- Classification agent.
+- Analysis agent.
+- Reporting agent.
 
+LangGraph will eventually coordinate these agents and their workflows.
 
-def ask_local_model(prompt: str) -> str:
+Initially, simpler Python functions will be used to establish the fundamental application architecture.
 
-    response = requests.post(
-        f"{OLLAMA_URL}/api/chat",
-        json={
-            "model": MODEL,
-            "messages": [
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ],
-            "stream": False
-        },
-        timeout=180
-    )
+## 7. Future Development
 
-    response.raise_for_status()
+### 7.1 Agent Orchestration
 
-    return response.json()["message"]["content"]
+Introduce LangGraph to coordinate specialized agents, manage workflow execution and maintain application state.
 
+### 7.2 Knowledge Base
 
-if __name__ == "__main__":
-
-    result = ask_local_model(
-        "Give me three ideas for a Python project."
-    )
-
-    print(result)
-```
-
-#### Create main.py
-
-```python
-from agents.local_agent import ask_local_model
-
-answer = ask_local_model(
-    "Explain what an AI agent is in simple terms."
-)
-
-print(answer)
-```
-
-Run:
-
-```powershell
-python main.py
-```
-
-#### Add the advanced model
-
-Create `agents/advanced_agent.py`:
-
-```python
-def ask_advanced_model(prompt: str) -> str:
-
-    # Connect to a more powerful local model
-    # or an external AI provider API.
-
-    pass
-```
-
-#### Implement basic model routing
-
-```python
-def route_task(task_type, prompt):
-
-    if task_type == "simple_analysis":
-        return ask_local_model(prompt)
-
-    if task_type == "complex_reasoning":
-        return ask_advanced_model(prompt)
-
-    if task_type == "code_generation":
-        return ask_advanced_model(prompt)
-
-    raise ValueError("Unknown task type")
-```
-
-Initially, use manually defined task types. Later, implement intelligent routing.
-
-### Phase 6 – Introduce Web Scraping and AI Agents
-
-The application should contain four main responsibilities.
-
-#### 1. Web Scraper
-
-Collect information from websites and APIs.
-
-Recommended libraries:
-
-- Requests
-- BeautifulSoup
-- Scrapy
-
-#### 2. Data Processor
-
-Clean, normalize and structure information.
-
-Recommended libraries:
-
-- Pandas
-- SQLite
-
-#### 3. Local AI Agent
-
-Use the lightweight model for:
-
-- Text classification.
-- Entity extraction.
-- Initial summarization.
-- Metadata generation.
-- Simple information extraction.
-
-#### 4. Advanced AI Agent
-
-Use the more powerful model for:
-
-- Comparing information across sources.
-- Identifying patterns.
-- Generating code.
-- Complex reasoning.
-- Producing analytical reports.
-
-#### Example workflow
-
-Imagine collecting information about technology companies.
-
-1. Scrape company information from websites.
-2. Extract company names, descriptions, products and industries.
-3. Send the extracted content to the lightweight local model.
-4. Ask the model to categorize companies.
-5. Store structured results in SQLite.
-6. Send the dataset to the advanced model.
-7. Ask the advanced model to identify trends and produce a report.
-
-#### Security considerations
-
-Treat all scraped content as untrusted data.
-
-- Never allow scraped text to execute commands.
-- Don't give AI agents unrestricted terminal access.
-- Never expose passwords or API keys in prompts.
-- Separate information extraction from privileged actions.
-- Require human approval before executing generated code or making external changes.
-- Respect website terms, robots.txt and applicable privacy rules.
-
-Initially, the local model should only receive text and return text. Add tools progressively.
-
-## 5. Future Improvements
-
-### Agent Orchestration
-
-Introduce LangGraph to coordinate multiple agents and workflows.
-
-https://docs.langchain.com/oss/python/langgraph/overview
-
-### Knowledge Base
-
-Store processed information and introduce semantic search.
+Introduce a knowledge management system to store and retrieve information collected by the application.
 
 Potential technologies:
 
-- ChromaDB
-- FAISS
-- SQLite
-- Embedding models
+- ChromaDB.
+- FAISS.
+- SQLite.
+- Embedding models.
 
-### Data Analysis
+The objective is to support semantic search and retrieval-augmented generation (RAG).
 
-Use the advanced model to analyze collected information and generate reports.
+### 7.3 Data Analysis
 
-### Automation
+Develop workflows capable of:
 
-Introduce scheduled tasks and background processing once the basic system is stable.
+- Identifying trends.
+- Comparing datasets.
+- Detecting relationships.
+- Producing analytical summaries.
+- Generating structured reports.
 
-### Monitoring
+### 7.4 Automation
 
-Consider:
+Introduce:
 
-- htop for resource monitoring.
-- System logs.
-- Ollama model performance.
+- Scheduled scraping.
+- Background processing.
+- Automated classification.
+- Periodic reporting.
+- Database backups.
+
+### 7.5 Monitoring
+
+Implement monitoring for:
+
 - CPU and RAM consumption.
+- GPU utilization and memory.
+- AI inference performance.
+- Storage usage.
+- Application execution.
+- System health.
 
-## 6. Hardware Considerations
+## 8. Security Principles
 
-The old computer currently has 8 GB RAM.
+Security will be considered throughout the development process.
 
-| Configuration | Expected usage |
-|---|---|
-| 8 GB RAM | Small models and experimentation |
-| 16 GB RAM | More comfortable local inference |
-| 32 GB RAM | More flexibility with larger models |
+Main principles:
 
-An SSD is strongly recommended.
+- Restrict network access to trusted devices.
+- Avoid unnecessary internet access from the AI server.
+- Never expose local AI APIs directly to the public internet.
+- Protect credentials and API keys.
+- Treat scraped content as untrusted data.
+- Avoid giving AI agents unrestricted system access.
+- Require human approval for privileged operations.
+- Maintain regular backups.
+- Validate generated code before execution.
 
-Before upgrading, identify processor, motherboard compatibility and available storage.
+The objective is to create a controlled environment for experimentation, development and automation.
 
-CPU-only inference is possible, but generation speed may be limited.
+## 9. Implementation Roadmap
 
-## 7. Development Milestones
+The project will be developed through the following phases.
 
-| Milestone | Deliverable |
-|---|---|
-| 1 | Linux AI server operational |
-| 2 | Ollama and local model operational |
-| 3 | Remote SSH connection working |
-| 4 | Python application calling the local model |
-| 5 | Advanced model integrated |
-| 6 | Model routing implemented |
-| 7 | Web scraping pipeline operational |
-| 8 | Data processing and storage implemented |
-| 9 | Multiple AI agents coordinated |
-| 10 | Knowledge base and analytical reports |
+| Phase | Description | Status |
+|---|---|---|
+| 1 | Prepare the old computer and install Ubuntu Server | Completed |
+| 2 | Initial Ubuntu configuration, storage and networking | Next |
+| 3 | NVIDIA drivers, Ollama and local AI inference | Planned |
+| 4 | Python application and model integration | Planned |
+| 5 | Web scraping and data processing | Planned |
+| 6 | Multi-agent architecture and orchestration | Planned |
+| 7 | Knowledge base and semantic search | Planned |
+| 8 | Automation, monitoring and optimization | Planned |
 
-## 8. Initial Priorities
+**Phase 1 documentation:** Refer to the separate document *Home AI Infrastructure – Phase 1: Prepare the Old Computer* for hardware specifications, installation details, network configuration, completed tasks and current implementation status.
 
-1. Retrieve hardware specifications.
-2. Verify CPU architecture and storage.
-3. Check whether RAM can be upgraded to 16 GB.
-4. Download Ubuntu Server.
-5. Install Linux.
-6. Configure SSH and the firewall.
-7. Install Ollama.
-8. Run Llama 3.2 1B.
-9. Connect from the current computer.
-10. Build the first Python application.
+Each phase should be completed and tested before moving to the next.
 
-**Important:** Complete and test each milestone before moving to the next one.
+## 10. Guiding Principles
 
-The goal is to build a secure, modular and expandable home AI infrastructure that can eventually support multiple models, specialized agents, web scraping and advanced data analysis.
+The project will follow these principles:
+
+1. Build incrementally.
+2. Prefer modular and maintainable architecture.
+3. Validate each component before expanding.
+4. Use lightweight local models for appropriate tasks.
+5. Reserve advanced models for complex reasoning.
+6. Keep network access controlled.
+7. Preserve data integrity and maintain backups.
+8. Introduce automation progressively.
+9. Keep AI agents within clearly defined permissions.
+10. Prioritize practical functionality over unnecessary complexity.
+
+## 11. Final Objective
+
+Build a secure and expandable home AI infrastructure where multiple AI models and specialized agents collaborate to collect, process, analyze and organize information.
+
+The development workstation will act as the central intelligence and orchestration environment.
+
+The Ubuntu server will provide local AI inference and additional processing capabilities.
+
+The Python application will connect these components into a unified system.
+
+The long-term objective is to create a personal AI platform capable of supporting research, web scraping, data analysis, knowledge management, automation and advanced multi-agent workflows.
