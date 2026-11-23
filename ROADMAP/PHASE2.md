@@ -24,8 +24,6 @@ This phase will focus on:
 
 Hardware specifications, installation history and initial network architecture are documented in the Phase 1 document.
 
-**Important:** Preserve the existing data on both additional storage drives throughout this phase.
-
 ---
 
 ## 2. Initial Ubuntu Server Configuration
@@ -52,7 +50,20 @@ hostnamectl
 free -h
 df -h
 ip -br addr
+timedatectl
 ```
+
+**Results:**
+
+- Ubuntu 26.04.1 LTS (Resolute).
+- Kernel: 7.0.0-44-generic.
+- Hostname: `ai-server`.
+- Architecture: x86-64.
+- RAM: 16 GB.
+- System drive: Kingston 240 GB SSD.
+- Timezone corrected from UTC to Eastern Time.
+- System clock synchronized using NTP.
+- Ethernet interface: `enp8s0`.
 
 ### 2.2 Verify Remote Access
 
@@ -65,6 +76,10 @@ sudo systemctl status ssh.socket
 Test remote access from the development workstation.
 
 Retain the existing SSH socket activation configuration.
+
+**Results:** SSH works.
+
+SSH socket is enabled and listening on port 22.
 
 ### 2.3 Update Ubuntu
 
@@ -94,6 +109,12 @@ sudo apt install -y \
 
 Reboot if necessary and verify that SSH access still works.
 
+**Results:**
+
+- Ubuntu updated successfully.
+- Basic administration utilities were addressed.
+- No reboot was initially required after updates.
+
 Documentation:
 
 https://documentation.ubuntu.com/server/
@@ -119,50 +140,70 @@ sudo fdisk -l
 sudo blkid
 ```
 
-### 3.2 Verify Existing Data
+### 3.2 Verify and Prepare Storage
 
-Confirm that:
+The contents of both additional drives were reviewed.
 
-- The WDC SSD is correctly identified.
-- The Seagate HDD is correctly identified.
-- Existing partitions and filesystems are preserved.
-- Existing data is accessible.
-- Both drives are in reasonable health.
+The user explicitly approved permanently erasing both drives.
 
-Do not format either drive without explicitly verifying its contents and intended use.
+Both drives were repartitioned and formatted using ext4.
+
+Current storage configuration:
+
+| Drive | Filesystem | Label | Purpose |
+|---|---|---|---|
+| Kingston SSD | ext4 | - | Ubuntu operating system |
+| WDC SSD | ext4 | ai-ssd | AI models and application data |
+| Seagate HDD | ext4 | backup | Backups and archives |
 
 ### 3.3 Configure Mount Points
 
-Proposed storage organization:
+Current storage organization:
 
 | Drive | Mount point | Purpose |
 |---|---|---|
 | Kingston SSD | `/` | Ubuntu operating system |
-| WDC SSD | `/mnt/ai-data` | AI models and application data |
-| Seagate HDD | `/mnt/ai-backups` | Backups and archives |
+| WDC SSD | `/mnt/ai-ssd` | AI models and application data |
+| Seagate HDD | `/mnt/backup` | Backups and archives |
 
-Configure persistent mounts using filesystem UUIDs in `/etc/fstab`.
+Persistent mounts are configured using filesystem UUIDs in `/etc/fstab`.
 
-Verify that both drives mount correctly after reboot.
+Current entries:
+
+```fstab
+UUID=3e08dcda-25fa-44ce-92d7-f94394f2e97c /mnt/ai-ssd ext4 defaults,nofail 0 2
+UUID=56bdda1b-966e-417d-8c44-4f839e043152 /mnt/backup ext4 defaults,nofail 0 2
+```
+
+Verify mounts using:
+
+```bash
+findmnt /mnt/ai-ssd
+findmnt /mnt/backup
+```
+
+Both mounts were successfully verified after reboot.
 
 ### 3.4 Organize Storage
 
-Create a basic directory structure:
+Proposed directory structure:
 
 ```text
-/mnt/ai-data/
+/mnt/ai-ssd/
 ├── ollama/
 ├── applications/
 ├── databases/
 ├── datasets/
 └── temporary/
 
-/mnt/ai-backups/
+/mnt/backup/
 ├── system/
 ├── applications/
 ├── databases/
 └── datasets/
 ```
+
+Directory organization remains to be completed.
 
 ---
 
@@ -179,7 +220,13 @@ Confirm:
 - Default gateway.
 - DNS configuration.
 
-The current network architecture and previously identified IP addresses are documented in Phase 1.
+Current configuration:
+
+- Interface: `enp8s0`.
+- IPv4 address: `192.168.0.178`.
+- Gateway: `192.168.0.1`.
+- Ethernet speed: 1 Gbps.
+- DNS: Router-provided DNS servers.
 
 ### 4.2 Configure DHCP Reservation
 
@@ -187,7 +234,9 @@ Configure a DHCP reservation on the Fizz Hitron CODA-4680 router for the AI serv
 
 Use the verified Ethernet MAC address.
 
-The objective is to maintain a consistent server IP address without manually configuring a static address in Ubuntu.
+**Results:** DHCP reservation completed.
+
+The server retains its reserved IPv4 address.
 
 ### 4.3 Verify Local Connectivity
 
@@ -199,7 +248,27 @@ Confirm communication between:
 
 Verify that SSH remains accessible after network configuration.
 
-### 4.4 Network Architecture
+### 4.4 IPv6 Configuration
+
+IPv6 is currently enabled and automatically configured through router advertisements and DHCPv6.
+
+Verification commands:
+
+```bash
+ip -6 addr show enp8s0
+ip -6 route
+ping -6 -c 4 google.com
+```
+
+**Results:**
+
+- Global IPv6 addresses assigned.
+- IPv6 default route available.
+- External IPv6 connectivity successfully tested.
+
+No static IPv6 configuration is currently required.
+
+### 4.5 Network Architecture
 
 The intended architecture remains:
 
@@ -240,6 +309,13 @@ Check available NVIDIA driver packages:
 ubuntu-drivers devices
 ```
 
+**Results:**
+
+- GPU: NVIDIA GeForce GTX 1070.
+- Architecture: Pascal.
+- Compute capability: 6.1.
+- VRAM: 8 GB.
+
 ### 5.2 Install a Compatible Driver
 
 Verify compatibility between:
@@ -249,9 +325,20 @@ Verify compatibility between:
 - NVIDIA driver.
 - GTX 1070 Pascal architecture.
 
-The project previously identified NVIDIA driver version 570 or newer as the target requirement for Ollama's Pascal GPU support.
+The project identified NVIDIA driver version 570 or newer as the target requirement for Ollama's Pascal GPU support.
 
-However, confirm package availability and compatibility with the installed Ubuntu release before installation.
+Installed driver:
+
+**NVIDIA 580.178.04**
+
+Secure Boot is disabled.
+
+Installation was performed using:
+
+```bash
+sudo apt update
+sudo ubuntu-drivers install nvidia:580
+```
 
 ### 5.3 Verify GPU Operation
 
@@ -259,20 +346,46 @@ After installing the driver and rebooting:
 
 ```bash
 nvidia-smi
+lspci -k -s 01:00.0
+lsmod | grep nvidia
 ```
 
-Confirm that:
+**Results:**
 
-- The GTX 1070 is detected.
-- The driver loads correctly.
-- Available VRAM is reported.
-- No significant driver errors are present.
+- GTX 1070 detected successfully.
+- Proprietary NVIDIA driver loaded.
+- Kernel driver in use: `nvidia`.
+- NVIDIA kernel modules loaded.
+- VRAM detected: 8192 MiB.
+- GPU temperature at idle: approximately 36°C.
+- Driver version: 580.178.04.
+- Driver reports CUDA 13.0 compatibility.
+
+Note: CUDA Toolkit is not yet installed. The CUDA version reported by `nvidia-smi` does not mean the CUDA Toolkit is installed.
+
+### 5.4 GPU Inference Preparation
+
+The primary objective is local LLM inference, not model training.
+
+Important hardware constraints:
+
+- Pascal architecture (compute capability 6.1).
+- 8 GB VRAM.
+- 16 GB system RAM.
+
+Start with quantized 3B–4B models and evaluate 7B–8B models using 4-bit quantization.
+
+Some models may require CPU offloading.
+
+Ollama is the planned inference engine.
 
 Documentation:
 
 https://documentation.ubuntu.com/server/how-to/graphics/install-nvidia-drivers/
 
 https://docs.ollama.com/gpu
+
+https://developer.nvidia.com/cuda-gpus
 
 ---
 
@@ -290,9 +403,11 @@ The intended configuration should:
 - Allow Ollama API access from the development workstation.
 - Allow necessary DHCP communication.
 - Restrict incoming connections.
-- Block outbound internet access from the AI server.
 - Account for IPv4 and IPv6.
 - Preserve local network communication.
+- Restrict unnecessary outbound internet access.
+
+Outbound internet access may be temporarily required for updates, installation and model downloads.
 
 ### 6.2 Security Considerations
 
@@ -310,15 +425,14 @@ Keep an existing SSH session available during firewall configuration.
 
 ### 6.3 Final Network Security Objective
 
-The intended configuration is:
-
 | Communication | Policy |
 |---|---|
 | Development workstation → AI server | Allowed |
 | SSH | Allowed |
 | Ollama API | Allowed |
-| AI server → Local network | Restricted to necessary communication |
-| AI server → Public internet | Blocked |
+| Necessary local network communication | Allowed |
+| Unnecessary inbound connections | Blocked |
+| Unnecessary outbound internet access | Restricted |
 | Public internet → AI server | Blocked |
 
 Never expose Ollama directly to the public internet.
@@ -358,7 +472,7 @@ Configure Ollama to store its models on the WDC SSD rather than the operating sy
 Proposed location:
 
 ```text
-/mnt/ai-data/ollama/models
+/mnt/ai-ssd/ollama/models
 ```
 
 Verify that Ollama can access the directory and that model files are stored on the intended drive.
@@ -457,42 +571,46 @@ Phase 2 will be considered complete when the following objectives have been achi
 
 ### Ubuntu Configuration
 
-- [ ] Ubuntu version verified.
-- [ ] Hostname verified.
-- [ ] System updated.
-- [ ] Basic utilities installed.
-- [ ] SSH access verified.
+- [x] Ubuntu version verified.
+- [x] Hostname verified.
+- [x] System updated.
+- [x] Basic utilities addressed.
+- [x] SSH access verified.
+- [x] Timezone configured.
 
 ### Storage
 
-- [ ] WDC SSD identified.
-- [ ] Seagate HDD identified.
-- [ ] Existing data verified.
-- [ ] Persistent mounts configured.
+- [x] WDC SSD identified.
+- [x] Seagate HDD identified.
+- [x] Existing data reviewed and deletion explicitly approved.
+- [x] Both drives reformatted as ext4.
+- [x] Persistent mounts configured.
+- [x] Mounts verified after reboot.
 - [ ] Storage directory structure created.
-- [ ] Mounts verified after reboot.
 
 ### Network
 
-- [ ] Ethernet configuration verified.
-- [ ] DHCP reservation configured.
-- [ ] Local connectivity verified.
-- [ ] IPv4 configuration verified.
-- [ ] IPv6 configuration reviewed.
+- [x] Ethernet configuration verified.
+- [x] DHCP reservation configured.
+- [x] Local connectivity verified.
+- [x] IPv4 configuration verified.
+- [x] IPv6 configuration reviewed.
+- [x] IPv6 external connectivity tested.
 
 ### NVIDIA
 
-- [ ] GTX 1070 detected.
-- [ ] Compatible NVIDIA driver installed.
-- [ ] `nvidia-smi` operational.
-- [ ] GPU availability verified.
+- [x] GTX 1070 detected.
+- [x] NVIDIA 580 driver installed.
+- [x] `nvidia-smi` operational.
+- [x] NVIDIA kernel modules loaded.
+- [ ] GPU inference verified using Ollama.
 
 ### Security
 
 - [ ] `nftables` configured.
 - [ ] SSH access restricted appropriately.
 - [ ] Ollama API access restricted appropriately.
-- [ ] Outbound internet access blocked.
+- [ ] Unnecessary outbound internet access restricted.
 - [ ] IPv4 and IPv6 restrictions verified.
 - [ ] Firewall rules persistent after reboot.
 - [ ] Local communication remains functional.
