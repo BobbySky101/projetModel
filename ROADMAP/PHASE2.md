@@ -363,7 +363,26 @@ lsmod | grep nvidia
 
 Note: CUDA Toolkit is not yet installed. The CUDA version reported by `nvidia-smi` does not mean the CUDA Toolkit is installed.
 
-### 5.4 GPU Inference Preparation
+### 5.4 Hardware Specifications Summary
+
+The following hardware has been verified:
+
+| Component | Specification |
+|---|---|
+| CPU | Intel Core i7-8700 @ 3.20 GHz |
+| Architecture | x86_64 |
+| Physical cores | 6 |
+| Threads | 12 |
+| RAM | 16 GB |
+| Swap | 4 GB |
+| GPU | NVIDIA GeForce GTX 1070 |
+| GPU VRAM | 8 GB |
+
+The server will primarily use the NVIDIA GPU for local LLM inference.
+
+Model selection should take available VRAM and system memory into consideration.
+
+### 5.5 GPU Inference Preparation
 
 The primary objective is local LLM inference, not model training.
 
@@ -391,55 +410,73 @@ https://developer.nvidia.com/cuda-gpus
 
 ## 6. Network Security Configuration
 
-The objective is to restrict unnecessary network access while preserving communication with the development workstation.
+The objective is to protect the Ubuntu AI server while allowing controlled communication with the development workstation.
 
-### 6.1 Firewall Technology
+The development workstation will act as the primary interface between users (including the phone in the future) and the Ubuntu AI server.
+
+The phone will not communicate directly with the Ubuntu server.
+
+### 6.1 Firewall Configuration
 
 Use `nftables` as the primary firewall.
 
 The intended configuration should:
 
-- Allow SSH from the development workstation.
+- Allow SSH connections from the development workstation.
 - Allow Ollama API access from the development workstation.
-- Allow necessary DHCP communication.
-- Restrict incoming connections.
-- Account for IPv4 and IPv6.
-- Preserve local network communication.
-- Restrict unnecessary outbound internet access.
+- Block incoming connections from other devices.
+- Allow necessary outbound internet connections.
+- Allow established and related connections.
+- Account for both IPv4 and IPv6.
+- Preserve necessary network services such as DHCP and DNS.
 
-Outbound internet access may be temporarily required for updates, installation and model downloads.
-
-### 6.2 Security Considerations
-
-Before applying firewall rules:
-
-- Verify the actual network interfaces.
-- Confirm the trusted local subnet.
-- Account for IPv6.
-- Preserve SSH access.
-- Avoid accidentally blocking required network services.
-
-Test the configuration before making it persistent.
-
-Keep an existing SSH session available during firewall configuration.
-
-### 6.3 Final Network Security Objective
+### 6.2 Network Access Policy
 
 | Communication | Policy |
 |---|---|
-| Development workstation → AI server | Allowed |
-| SSH | Allowed |
-| Ollama API | Allowed |
-| Necessary local network communication | Allowed |
-| Unnecessary inbound connections | Blocked |
-| Unnecessary outbound internet access | Restricted |
-| Public internet → AI server | Blocked |
+| Development workstation → SSH (port 22) | Allowed |
+| Development workstation → Ollama API (port 11434) | Allowed |
+| Phone → Ubuntu server | Blocked |
+| Other home devices → Ubuntu server | Blocked |
+| Ubuntu server → Internet | Allowed |
+| Established connections | Allowed |
+| Other unsolicited incoming connections | Blocked |
 
-Never expose Ollama directly to the public internet.
+The development workstation will be responsible for handling future phone access and forwarding requests to the AI server when necessary.
 
-Documentation:
+### 6.3 Security Considerations
+
+Before applying firewall rules:
+
+- Verify the development workstation's IP address.
+- Verify the AI server's reserved IP address.
+- Confirm the trusted local subnet.
+- Account for IPv4 and IPv6.
+- Preserve SSH access during configuration.
+- Avoid blocking necessary outbound connections.
+
+Keep an existing SSH session available while testing firewall changes.
+
+Do not expose SSH or the Ollama API through router port forwarding.
+
+### 6.4 Firewall Verification
+
+After configuration, verify that:
+
+- SSH remains accessible from the development workstation.
+- Ollama API access works from the development workstation.
+- Other devices cannot access the server's SSH or Ollama API.
+- IPv4 and IPv6 restrictions work as expected.
+- Outbound internet access remains functional.
+- Firewall rules persist after reboot.
+
+### 6.5 Documentation
+
+https://documentation.ubuntu.com/server/how-to/security/firewalls/
 
 https://netfilter.org/projects/nftables/
+
+https://docs.ollama.com/
 
 ---
 
