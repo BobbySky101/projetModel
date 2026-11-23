@@ -644,13 +644,23 @@ Phase 2 will be considered complete when the following objectives have been achi
 
 ### Security
 
-- [ ] `nftables` configured.
-- [ ] SSH access restricted appropriately.
-- [ ] Ollama API access restricted appropriately.
-- [ ] Unnecessary outbound internet access restricted.
-- [ ] IPv4 and IPv6 restrictions verified.
-- [ ] Firewall rules persistent after reboot.
-- [ ] Local communication remains functional.
+### Security
+
+- [x] nftables installed.
+- [x] Existing configuration backed up.
+- [x] Firewall rules configured.
+- [x] Configuration syntax validated.
+- [x] SSH access restricted to development workstation.
+- [x] Ollama API access restricted to development workstation.
+- [x] Default incoming policy set to DROP.
+- [x] Default forwarding policy set to DROP.
+- [x] Outgoing connections permitted.
+- [x] IPv4 connectivity verified.
+- [x] IPv6 connectivity verified.
+- [x] Firewall enabled at startup.
+- [x] SSH access verified after firewall activation.
+- [ ] Unauthorized device access tested.
+- [x] Firewall persistence verified after reboot.
 
 ### Ollama
 
