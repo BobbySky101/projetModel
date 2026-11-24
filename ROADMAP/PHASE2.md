@@ -623,7 +623,7 @@ Phase 2 will be considered complete when the following objectives have been achi
 - [x] Both drives reformatted as ext4.
 - [x] Persistent mounts configured.
 - [x] Mounts verified after reboot.
-- [ ] Storage directory structure created.
+- [x] Storage directory structure created.
 
 ### Network
 
@@ -659,17 +659,17 @@ Phase 2 will be considered complete when the following objectives have been achi
 - [x] IPv6 connectivity verified.
 - [x] Firewall enabled at startup.
 - [x] SSH access verified after firewall activation.
-- [ ] Unauthorized device access tested.
+- [x] Unauthorized device access tested.
 - [x] Firewall persistence verified after reboot.
 
 ### Ollama
 
-- [ ] Ollama installed.
-- [ ] Model storage configured on WDC SSD.
-- [ ] Initial model downloaded.
-- [ ] Local inference tested.
-- [ ] GPU utilization verified.
-- [ ] API accessible from development workstation.
+- [x] Ollama installed.
+- [x] Model storage configured on WDC SSD.
+- [x] Initial model downloaded.
+- [x] Local inference tested.
+- [x] GPU utilization verified.
+- [x] API accessible from development workstation.
 
 ---
 
