@@ -325,12 +325,11 @@ The project will be developed through the following phases.
 |---|---|---|
 | 1 | Prepare the old computer and install Ubuntu Server | Completed |
 | 2 | Initial Ubuntu configuration, storage and networking | Next |
-| 3 | NVIDIA drivers, Ollama and local AI inference | Planned |
-| 4 | Python application and model integration | Planned |
-| 5 | Web scraping and data processing | Planned |
-| 6 | Multi-agent architecture and orchestration | Planned |
-| 7 | Knowledge base and semantic search | Planned |
-| 8 | Automation, monitoring and optimization | Planned |
+| 3 | Python application and model integration | Planned |
+| 4 | Web scraping and data processing | Planned |
+| 5 | Multi-agent architecture and orchestration | Planned |
+| 6 | Knowledge base and semantic search | Planned |
+| 7 | Automation, monitoring and optimization | Planned |
 
 **Phase 1 documentation:** Refer to the separate document *Home AI Infrastructure – Phase 1: Prepare the Old Computer* for hardware specifications, installation details, network configuration, completed tasks and current implementation status.
 
