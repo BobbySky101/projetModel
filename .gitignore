@@ -1,1 +1,46 @@
-iso/
+# Built files
+*.class
+*.log
+*.swp
+*.tmp
+*.temp
+*.bak
+*.pyc
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE specific files
+.idea/
+.vscode/
+.project
+.classpath
+.settings/
+
+# Build directories
+bin/
+build/
+target/
+out/
+dist/
+*_x86_64*
+*_win32*
+
+# Dependency directories (npm, yarn, pip, etc.)
+node_modules/
+vendor/
+.Pipfile.lock
+package-lock.json
+.pip/
+.venv/
+.iso/
+
+# Environment and configuration files
+.env
+*.env
+.env.local
+.secrets/
+*.pem
+private.key
+
+# Test files
