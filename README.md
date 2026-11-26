@@ -20,7 +20,7 @@ This repository establishes the software foundation for future AI agents. It pro
 Open PowerShell on your workstation and run:
 
 ```powershell
-ssh -N -L 127.0.0.1:11434:ai-server ollama-user@ai-server
+ssh -N -L 11434:127.0.0.1:11434 ai-server 
 ```
 
 **Command Breakdown:**
@@ -69,7 +69,7 @@ netstat -ano | findstr :11434
    .venv\Scripts\Activate.ps1  # Windows PowerShell
    # or
    source .venv/Scripts/activate  # Git Bash
-   pip install -r requirements.txt
+   python -m pip install -r requirements.txt
    ```
 4. **Set Environment Variables**:
    Copy `.env.example` to `.env` and configure your Ollama server details (see Section 6 in `phase3-application-platform.md`).

@@ -25,6 +25,7 @@ out/
 dist/
 *_x86_64*
 *_win32*
+*.egg-info/
 
 # Dependency directories (npm, yarn, pip, etc.)
 node_modules/
@@ -42,5 +43,8 @@ package-lock.json
 .secrets/
 *.pem
 private.key
+__pycache__/
+.pytest_cache/
+*.py[cod]
 
 # Test files

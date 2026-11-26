@@ -15,10 +15,10 @@ import logging
 # Import the OllamaClient from this project's structure
 try:
     # If running within the virtual environment defined in README.md Step 3
-    from src.ollama_client import get_client as _get_client
+    from projet_model.clients.ollama_client import get_client as _get_client
 except ImportError:
     # Fallback for direct import (though README.md expects src.ollama_client)
-    from ollama_client import get_client as _get_client
+    from src.projet_model.clients.ollama_client import get_client as _get_client
 
 logger = logging.getLogger("ModelRouter")
 

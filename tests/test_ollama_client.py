@@ -1,5 +1,5 @@
 import pytest
-from src.ollama_client import get_client, OllamaClient
+from projet_model.clients.ollama_client import get_client, OllamaClient
 import os
 # Optional: Set a fake env if real connection fails for local testing
 # os.environ['OLLAMA_HOST'] = 'http://localhost:11434' 
@@ -23,7 +23,7 @@ def test_list_models_structure():
 
 def test_generate_response():
     """Test generation with a known model (if available)."""
-    router = __import__('src.router', fromlist=['get_router']).get_router()
+    router = __import__('projet_model.routing.router', fromlist=['get_router']).get_router()
     # Use a known stable model if possible, otherwise first available
     models = router.get_available_models()
     

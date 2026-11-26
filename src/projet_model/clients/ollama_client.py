@@ -8,6 +8,7 @@ handling HTTP requests and responses while abstracting connection details
 
 import os
 import logging
+import requests
 from dotenv import load_dotenv
 import time
 
