@@ -21,7 +21,7 @@ dev = [
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["projet_model*"]
+include = ["projet_model*","modules*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -1,120 +1,132 @@
-# language python src/scraper_script.py
-import requests
-from bs4 import BeautifulSoup
-import time
+# # ⚠️ IMPORTANT: This script requires the following packages installed via pip:
+# # pip install playwright camoufox
 
-def scrape_metro_product(url):
-    """
-    Scrape product details from Metro.ca.
-    Extracts name, brand, sale price, and regular price based on the provided HTML structure.
-    
-    Args:
-        url (str): The URL of the product tile page.
-        
-    Returns:
-        dict or list: Structured product data.
-    """
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-    }
-    
-    try:
-        response = requests.get(url, headers=headers, timeout=10)
-        response.raise_for_status()
-        
-        soup = BeautifulSoup(response.text, 'html.parser')
-        scraped_data = []
+# from playwright.sync_api import sync_playwright
+# # pip install playwright camoufox
 
-        # TARGET SELECTOR: Find the main container holding the product tile data
-        # Based on your note file, look for elements containing data-main-price
-        items = soup.select('[data-main-price]')
-        
-        for item in items:
-            # 1. Extract Price from data attribute (as requested)
-            sale_price_attr = item.get('data-main-price', 'N/A')
-            
-            # 2. Extract Regular Price (nested text inside .pricing__before-price)
-            regular_price_elem = item.find(class_='pricing__before-price')
-            regular_price_text = regular_price_elem.find_next_sibling().get_text(strip=True) if regular_price_elem else "N/A"
-            # Note: Metro often puts the price span right after the label. 
-            # A more robust way for this specific structure is searching all spans in the sibling divs
-            
-            # Let's re-scan the entire item container for price numbers to be safe against layout changes
-            regular_price_val = "N/A"
-            sale_price_val = sale_price_attr
-            
-            # Helper to clean French currency strings (e.g., "13,99 $" -> 13.99)
-            def clean_currency(s):
-                if not s: return None
-                # Remove $ and non-numeric chars except comma/dot
-                cleaned = "".join(c for c in str(s) if c.isdigit() or c in ',.')
-                try:
-                    return float(cleaned.replace(',', '.')) # Handle French decimal comma
-                except ValueError:
-                    return "N/A"
+# from playwright.sync_api import sync_playwright
+# from camoufox.sync_api import NewContext
+# import json
+# import time
 
-            regular_price_val = clean_currency(regular_price_text)
-            sale_price_val = clean_currency(sale_price_attr)
+# 🔒 TARGET URL - Replace this with your Cloudflare-protected URL
+TARGET_URL = "https://bot.sannysoft.com/"  # ← CHANGE THIS
+
+from camoufox.sync_api import Camoufox
+
+with Camoufox(headless=True) as browser:
+    page = browser.new_page()
+    page.goto("https://example.com")
 
 
-            # 3. Extract Title (.head__title)
-            title_elem = item.find(class_='head__title')
-            product_name = title_elem.get_text(strip=True) if title_elem else "No Title"
+# class CloudflareBypassScraper:
+#     """
+#     Scraper class using Playwright + Camoufox to bypass Cloudflare.
+#     Uses official camoufox.sync_api.NewContext API for fingerprint spoofing.
+#     """
 
-            # 4. Extract Brand (.head__brand)
-            brand_elem = item.find(class_='head__brand')
-            product_brand = brand_elem.get_text(strip=True) if brand_elem else "Unknown"
+#     def __init__(self, target_url: str = None):
+#         self.target_url = target_url or TARGET_URL
+#         self.context: NewContext = None
+#         self.browser = None
 
-            scraped_data.append({
-                'name': product_name,
-                'brand': product_brand,
-                'regular_price': regular_price_val,
-                'sale_price': sale_price_val,
-                'source_url': url
-            })
-            
-        return scraped_data
+#     def scrape(self) -> dict | None:
+#         """
+#         Main scraping method using Camoufox to bypass Cloudflare.
 
-    except requests.exceptions.RequestException as e:
-        print(f"Error fetching URL: {e}")
-        return []
-    except Exception as e:
-        print(f"Unexpected error: {e}")
-        return []
+#         Returns:
+#             dict | None: Scraped data as JSON (or None if scraping fails).
+#         """
+#         try:
+#             print(f"🚀 Starting scrape of {self.target_url}")
 
-if __name__ == "__main__":
-    time.sleep(1)
-    
-    # Example URL format for Metro product page (adjust if necessary)
-    # Often product pages are deep links. If scraping a listing page, 
-    # you might need to find the 'data-uri' or similar anchor points first.
-    target_url = "https://www.metro.ca/epicerie-en-ligne/recherche"  # Adjust to actual product detail URL
-    
-    # results = scrape_metro_product(target_url)
-    
-    # if results:
-    #     print("\nScraped Metro Product Data:")
-    #     for item in results:
-    #         print(f"Brand: {item['brand']}")
-    #         print(f"Product: {item['name']}")
-    #         print(f"Regular Price: {item['regular_price']} €/$")
-    #         print(f"Sale Price: {item['sale_price']} €/$")
-    #         print("-" * 30)
+#             # Launch browser using Playwright sync API with Camoufox context
+#             # NewContext is the official synchronous API from camoufox.sync_api
+#             self.context = NewContext(
+#                 browser=self.browser,
+#                 os="windows",
+#                 headless=False,                        # Run headlessly
+#                 user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+#                 viewport={"width": 1920, "height": 1080},
+#                 device_scale_factor=1.0,
+#             )
 
-    urls = [
-        "https://www.metro.ca/",
-        "https://www.metro.ca/epicerie-en-ligne/",
-        "https://www.metro.ca/epicerie-en-ligne/recherche",
-    ]
-    for url in urls:
-        try:
-            response = requests.get(url, timeout=15)
-            print(url, response.status_code)
-        except requests.RequestException as e:
-            print(url, e)
+#             print("✅ Camoufox context created (Official API: camoufox.sync_api.NewContext)")
 
-    response = requests.get(target_url)
-    print("Status:", response.status_code)
-    print("Headers:", response.headers)
-    print("Response:", response.text[:1000])
-    response.raise_for_status()
+#             # Navigate to target URL using the context's page
+#             page = self.context.new_page()
+#             print(f"🌐 Navigating to {self.target_url}...")
+
+#             # Set a generous timeout for Cloudflare challenges (up to 2 minutes)
+#             # Note: NewContext uses await internally even in sync context mode
+#             # The Playwright actions are async underneath Camoufox's wrapper
+#             page.goto(self.target_url, wait_until="networkidle", timeout=120000)
+
+#             # Wait for dynamic content to load
+#             try:
+#                 page.wait_for_selector("body", state="visible", timeout=30000)
+#             except Exception as e:
+#                 print(f"⚠️ Warning: Could not find body element - {e}")
+
+#             # Extract content from the page
+#             content = page.inner_text("body")
+
+#             # Parse JSON if the site returns JSON response
+#             response_content = page.content()
+#             try:
+#                 data = json.loads(response_content)
+#             except json.JSONDecodeError:
+#                 print("⚠️ Response is not JSON, returning raw text")
+#                 data = {"content": content}
+
+#             print(f"✅ Successfully scraped {self.target_url}")
+
+#             return data
+
+#         except Exception as e:
+#             print(f"❌ Scrape failed with error: {e}")
+#             import traceback
+#             traceback.print_exc()
+#             return None
+#         finally:
+#             # Close browser context and cleanup resources
+#             if self.browser:
+#                 self.browser.stop()
+#             if self.context:
+#                 self.context.close()
+#             print("🛑 Browser closed.")
+
+#     def get_page_html(self) -> str:
+#         """Returns the full HTML of the scraped page."""
+#         try:
+#             self.scrape()
+#             page = self.context.new_page()
+#             page.goto(self.target_url, timeout=60000)
+#             return page.content()
+#         except Exception as e:
+#             print(f"Error getting HTML: {e}")
+#             return None
+
+
+# # Example usage (uncomment to run):
+# if __name__ == "__main__":
+#     # Replace with your actual target URL
+#     scraper = CloudflareBypassScraper(target_url="https://bot.sannysoft.com/")
+
+#     print("🔍 Starting Cloudflare bypass scrape...\n")
+
+#     data = scraper.scrape()
+
+#     if data:
+#         print("\n📦 Scraped Data:")
+#         print(f"Type: {type(data)}")
+#         # Pretty print if it's a dict, otherwise print the content
+#         if isinstance(data, dict):
+#             for key, value in data.items():
+#                 print(f"{key}: {value}")
+#         else:
+#             print(value[:500] if value else "Empty response")
+#     else:
+#         print("\n⚠️ No data retrieved.")
+# import json
+# import time
